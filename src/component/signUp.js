@@ -173,7 +173,7 @@ import Swal from "sweetalert2";
 export function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: "",  // Changed 'Name' to 'username' for consistency
+    username: "", 
     email: "",
     password: "",
     bio: "",
@@ -189,12 +189,27 @@ export function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3100/user/signUp", formData); // Removed wrapping `formData` in an extra object
+      const response = await axios.post("http://localhost:3100/user/signUp", formData);
       console.log("Sign-up successful:", response.data);
 
-      sessionStorage.setItem("authToken", response.data.token);
-      console.log(response.data.token);
+        if(response&& response.data){
+        sessionStorage.setItem("signupdata",JSON.stringify(response.data))
+       const data = JSON.parse(sessionStorage.getItem("signupdata"))
+       const userId=data.user.id;
+       console.log(userId)
+       const defaultURL="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSM6uJNFja3fvFcmq976LVMKJ06-dGVPpqKug&s"
 
+      const response2 = await axios.post("http://localhost:3100/user/InsertProfile",{
+        profileURL:defaultURL,
+        profileid:userId
+      })
+        }
+
+
+
+
+
+        
       Swal.fire({
         title: "Success!",
         text: "You have signed up successfully.",
@@ -238,7 +253,7 @@ export function SignUp() {
               className="form-control text-center inpt"
               placeholder="Username"
               id="username"
-              name="username" // Changed from 'Name' to 'username'
+              name="username" 
               value={formData.username}
               onChange={handleChange}
               required
@@ -277,7 +292,7 @@ export function SignUp() {
               className="form-control text-center inpt"
               id="gender"
               name="gender"
-              value={formData.gender} // Changed from `defaultValue` to `value` for a controlled component
+              value={formData.gender} 
               onChange={handleChange}
               required
             >

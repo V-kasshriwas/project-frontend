@@ -1,28 +1,68 @@
 
 import { useState, useRef } from "react";
-
+import axios from "axios";
+import swal from "sweetalert2"
 export function EditProfile() {
   let alternateImage =
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSM6uJNFja3fvFcmq976LVMKJ06-dGVPpqKug&s";
   let file = useRef();
   const [imageProfile, setImageProfile] = useState(alternateImage);
+  
+
 
   const changePhoto =async (e) => {
     e.preventDefault();
-    
+    const userdata = JSON.parse(sessionStorage.getItem("userData"));
+    console.log(userdata.user.id)
+
     const selectedFile = await file.current.files[0];
     const data = new FormData();
     data.append("file",selectedFile)
     data.append("upload_preset","Anonsphere")
     data.append("cloud_name","dxe2wgdde")
-    if (selectedFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageProfile(reader.result);
-        console.log(reader.result); // To verify the data URL
-      };
-      reader.readAsDataURL(selectedFile);
+    try {
+      const cloudinaryResponse = await fetch("https://api.cloudinary.com/v1_1/dxe2wgdde/image/upload", {
+        method: "POST",
+        body: data,
+      });
+      const cloudinaryData = await cloudinaryResponse.json();
+      const URL = cloudinaryData.url;
+      const id = userdata.user.id
+      console.log(URL);
+      console.log(id);
+
+      
+      const result = await axios.patch("http://localhost:3100/user/updateProfile", {
+        profileURL: URL,
+        profileid: id,
+    });
+    if(result){
+      swal.fire({
+        title: "Success!",
+        text: "Profile Updated Succesfully.",
+        icon: "success",
+        confirmButtonText: "OK",
+      }).then(() => {
+        window.location.href = "/profile";
+      });
+    }else{
+      swal.fire({
+        title:"Denied",
+        text:"profile updation failed",
+        icon:"fail",
+        confirmButtonText:"ok"
+      })
     }
+
+// console.log(response)
+   
+    
+  } catch (error) {
+      console.error("Error updating profile picture:", error);
+  }
+   
+ 
+    
   };
 
   return (
@@ -93,6 +133,7 @@ export function EditProfile() {
 
 
 // ---------------------------------------------------------------
+// cloudinary code
      // let name = "Vikas_Shriwas";
         // const {profile,setProfile} = useState();
     //     const profileChange =()=>{
@@ -107,4 +148,24 @@ export function EditProfile() {
     //   res.json()
     // ).then((data)=>{
     //   let s=""+data.url
+    // })
+
+    //fetch data
+    // await fetch("https://api.cloudinary.com/v1_1/dxe2wgdde/image/upload",{
+    //   method:"post",
+    //   body:data
+    // }).then((res)=> 
+    //   res.json()
+    // ).then(async(data)=>{
+    //   //  let s=  ""+data.url
+    //    file =""+data.url
+    //    let profileURL = file
+    //   console.log(file);
+    //  let response= await axios.post("http://localhost:3100/user/updateProfile",{
+    //   profileid:userid,
+    //   profileURL:profileURL
+      
+    //  })
+
+
     // })
